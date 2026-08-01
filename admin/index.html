@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CA Portal Admin</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #f8fafc; color: #1e293b; }
+    .header { background: #1e3a5f; color: #fff; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 20px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; }
+    .tab { padding: 10px 20px; cursor: pointer; border: none; background: none; font-size: 14px; font-weight: 500; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+    .tab.active { color: #1e3a5f; border-bottom-color: #1e3a5f; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 24px; margin-bottom: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; font-family: inherit; transition: border-color 0.2s; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #1e3a5f; box-shadow: 0 0 0 3px rgba(30,58,95,0.1); }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: #1e3a5f; color: #fff; }
+    .btn-primary:hover { background: #152b49; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-success { background: #10b981; color: #fff; }
+    .btn-outline { background: #fff; color: #1e3a5f; border: 2px solid #1e3a5f; }
+    .btn-sm { padding: 6px 14px; font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 12px; background: #f1f5f9; font-weight: 600; color: #475569; font-size: 12px; text-transform: uppercase; }
+    td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
+    tr:hover td { background: #f8fafc; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 100px; font-size: 11px; font-weight: 600; }
+    .tag-blue { background: #dbeafe; color: #1e40af; }
+    .tag-green { background: #dcfce7; color: #166534; }
+    .tag-yellow { background: #fef9c3; color: #854d0e; }
+    .tag-red { background: #fee2e2; color: #991b1b; }
+    .status { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; padding: 12px; background: #f0fdf4; border-radius: 8px; font-size: 13px; }
+    .status.error { background: #fef2f2; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal.active { display: flex; }
+    .modal-content { background: #fff; border-radius: 16px; padding: 24px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
+    .login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0f172a; z-index: 3000; display: flex; align-items: center; justify-content: center; }
+    .login-card { background: #fff; padding: 32px; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 24px; border-radius: 8px; color: #fff; font-size: 14px; z-index: 4000; animation: slideUp 0.3s ease; }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  </style>
+</head>
+<body>
+
+  <!-- Login Modal Overlay -->
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-card">
+      <h2 style="margin-bottom:8px;color:#1e3a5f;">CA Portal Admin</h2>
+      <p style="font-size:13px;color:#64748b;margin-bottom:24px;">Sign in with your administrator credentials</p>
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="loginUsername" value="admin" required placeholder="admin">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" value="admin123" required placeholder="••••••••">
+        </div>
+        <div id="loginError" style="color:#ef4444;font-size:13px;margin-bottom:16px;display:none;"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="header">
+    <h1>CA Portal Admin</h1>
+    <div style="display:flex;gap:12px;align-items:center;">
+      <button class="btn btn-success" onclick="triggerFetch()" id="fetchBtn">Fetch Latest News</button>
+      <span id="userBadge" style="font-size:13px;opacity:0.9;background:rgba(255,255,255,0.15);padding:4px 10px;border-radius:6px;">JWT Authenticated</span>
+      <button class="btn btn-outline btn-sm" style="color:#fff;border-color:rgba(255,255,255,0.4);" onclick="handleLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('news')">News & Updates</button>
+      <button class="tab" onclick="switchTab('compliance')">Compliance Dates</button>
+      <button class="tab" onclick="switchTab('tax-rates')">Tax Rates</button>
+      <button class="tab" onclick="switchTab('logs')">Fetch Logs</button>
+    </div>
+
+    <!-- Status Bar -->
+    <div id="status" class="status" style="display:none;"></div>
+
+    <!-- News Tab -->
+    <div id="tab-news">
+      <div class="flex-between">
+        <h2>News & Updates</h2>
+        <button class="btn btn-primary" onclick="openNewsModal()">+ Add News</button>
+      </div>
+      <div class="card">
+        <table id="newsTable">
+          <thead><tr><th>Title</th><th>Category</th><th>Source</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Compliance Tab -->
+    <div id="tab-compliance" style="display:none;">
+      <div class="flex-between">
+        <h2>Compliance Dates</h2>
+        <button class="btn btn-primary" onclick="openComplianceModal()">+ Add Date</button>
+      </div>
+      <div class="card">
+        <table id="complianceTable">
+          <thead><tr><th>Month</th><th>Day</th><th>Event</th><th>Category</th><th>Priority</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tax Rates Tab -->
+    <div id="tab-tax-rates" style="display:none;">
+      <div class="flex-between">
+        <h2>Tax Rates</h2>
+        <button class="btn btn-primary" onclick="openTaxRateModal()">+ Add Rate</button>
+      </div>
+      <div class="card">
+        <table id="taxRatesTable">
+          <thead><tr><th>Category</th><th>Sub-Category</th><th>Rate</th><th>Description</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Logs Tab -->
+    <div id="tab-logs" style="display:none;">
+      <h2>Auto-Fetch Logs</h2>
+      <div class="card">
+        <table id="logsTable">
+          <thead><tr><th>Source</th><th>Status</th><th>Items</th><th>Error</th><th>Time</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- News Modal -->
+  <div id="newsModal" class="modal">
+    <div class="modal-content">
+      <h3 id="newsModalTitle">Add News</h3>
+      <div class="form-group"><label>Title</label><input id="nTitle"></div>
+      <div class="form-group"><label>Summary</label><textarea id="nSummary"></textarea></div>
+      <div class="form-group" style="display:flex;gap:12px">
+        <div style="flex:1"><label>Category</label><select id="nCat"><option>Income Tax</option><option>GST</option><option>Company Law</option><option>SEBI</option><option>Auditing</option><option>Finance</option></select></div>
+        <div style="flex:1"><label>Source</label><input id="nSource" value="Manual"></div>
+      </div>
+      <div class="form-group"><label>Impact</label><input id="nImpact" value="All stakeholders"></div>
+      <div class="form-group"><label>Published Date</label><input id="nDate" type="date"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-outline" onclick="closeModal('newsModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveNews()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compliance Modal -->
+  <div id="complianceModal" class="modal">
+    <div class="modal-content">
+      <h3 id="compModalTitle">Add Compliance Date</h3>
+      <div style="display:flex;gap:12px">
+        <div class="form-group" style="flex:1"><label>Month</label><select id="cMonth"><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option><option>January</option><option>February</option><option>March</option></select></div>
+        <div class="form-group" style="flex:1"><label>Day</label><input id="cDay" type="number" min="1" max="31"></div>
+      </div>
+      <div class="form-group"><label>Event Title</label><input id="cEvent"></div>
+      <div style="display:flex;gap:12px">
+        <div class="form-group" style="flex:1"><label>Category</label><select id="cCat"><option>Income Tax</option><option>GST</option><option>TDS</option><option>Company Law</option><option>Labour Law</option><option>General</option></select></div>
+        <div class="form-group" style="flex:1"><label>Priority</label><select id="cPriority"><option>high</option><option>medium</option><option>low</option></select></div>
+      </div>
+      <div class="form-group"><label>Description</label><textarea id="cDesc"></textarea></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-outline" onclick="closeModal('complianceModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveCompliance()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tax Rate Modal -->
+  <div id="taxRateModal" class="modal">
+    <div class="modal-content">
+      <h3 id="taxModalTitle">Add Tax Rate</h3>
+      <div style="display:flex;gap:12px">
+        <div class="form-group" style="flex:1"><label>Category</label><select id="tCat"><option>Income Tax</option><option>GST</option><option>TDS</option><option>Other</option></select></div>
+        <div class="form-group" style="flex:1"><label>Sub-Category</label><input id="tSub"></div>
+      </div>
+      <div class="form-group"><label>Rate</label><input id="tRate" placeholder="e.g., 5%, Nil"></div>
+      <div class="form-group"><label>Description</label><textarea id="tDesc"></textarea></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-outline" onclick="closeModal('taxRateModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTaxRate()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:3001/api/admin';
+    let currentEditId = null;
+    let allNewsData = [];
+
+    function getToken() {
+      return localStorage.getItem('admin_jwt') || '';
+    }
+
+    function checkAuth() {
+      const token = getToken();
+      if (!token) {
+        document.getElementById('loginOverlay').style.display = 'flex';
+      } else {
+        document.getElementById('loginOverlay').style.display = 'none';
+        loadNews();
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+      const errorDiv = document.getElementById('loginError');
+      errorDiv.style.display = 'none';
+
+      fetch(`${API}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.token) {
+          localStorage.setItem('admin_jwt', data.token);
+          if (data.user) document.getElementById('userBadge').textContent = `User: ${data.user.username}`;
+          document.getElementById('loginOverlay').style.display = 'none';
+          toast('Logged in successfully');
+          loadNews();
+        } else {
+          errorDiv.textContent = data.error || 'Invalid credentials';
+          errorDiv.style.display = 'block';
+        }
+      })
+      .catch(err => {
+        errorDiv.textContent = 'Server error. Please check backend status.';
+        errorDiv.style.display = 'block';
+      });
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('admin_jwt');
+      document.getElementById('loginOverlay').style.display = 'flex';
+      toast('Logged out');
+    }
+
+    function api(method, path, body) {
+      const token = getToken();
+      return fetch(`${API}${path}`, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: body ? JSON.stringify(body) : undefined
+      }).then(r => {
+        if (r.status === 401) {
+          handleLogout();
+          throw new Error('Unauthorized');
+        }
+        return r.json();
+      });
+    }
+
+    function toast(msg, error) {
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.style.background = error ? '#ef4444' : '#10b981';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('[id^="tab-"]').forEach(d => d.style.display = 'none');
+      event.target.classList.add('active');
+      document.getElementById('tab-' + name).style.display = 'block';
+      if (name === 'news') loadNews();
+      if (name === 'compliance') loadCompliance();
+      if (name === 'tax-rates') loadTaxRates();
+      if (name === 'logs') loadLogs();
+    }
+
+    function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+    // --- News ---
+    function loadNews() {
+      api('GET', '/news')
+        .then(data => {
+          allNewsData = data;
+          const tbody = document.querySelector('#newsTable tbody');
+          tbody.innerHTML = (Array.isArray(data) ? data : []).map(n => `<tr data-id="${n.id}">
+            <td style="max-width:350px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(n.title)}">${esc(n.title)}</td>
+            <td><span class="tag tag-blue">${esc(n.category)}</span></td>
+            <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(n.source)}">${esc(n.source)}</td>
+            <td style="white-space:nowrap;">${n.published_date||''}</td>
+            <td style="white-space:nowrap;">
+              <button class="btn btn-outline btn-sm" onclick="editRow(${n.id})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteNews(${n.id})">Del</button>
+            </td>
+          </tr>`).join('');
+        }).catch(() => {});
+    }
+    function editRow(id) {
+      const n = allNewsData.find(x => x.id === id);
+      if (n) editNews(n);
+    }
+    function openNewsModal() { currentEditId = null; document.getElementById('newsModalTitle').textContent = 'Add News'; clearForm('newsModal'); openModal('newsModal'); }
+    function editNews(n) {
+      currentEditId = n.id;
+      document.getElementById('newsModalTitle').textContent = 'Edit News';
+      document.getElementById('nTitle').value = n.title;
+      document.getElementById('nSummary').value = n.summary;
+      document.getElementById('nCat').value = n.category;
+      document.getElementById('nSource').value = n.source;
+      document.getElementById('nImpact').value = n.impact;
+      document.getElementById('nDate').value = n.published_date;
+      openModal('newsModal');
+    }
+    function saveNews() {
+      const body = { title: document.getElementById('nTitle').value, summary: document.getElementById('nSummary').value, category: document.getElementById('nCat').value, source: document.getElementById('nSource').value, impact: document.getElementById('nImpact').value, published_date: document.getElementById('nDate').value };
+      const method = currentEditId ? 'PUT' : 'POST';
+      const url = currentEditId ? `/news/${currentEditId}` : '/news';
+      api(method, url, body).then(() => { closeModal('newsModal'); loadNews(); toast(currentEditId ? 'Updated!' : 'Added!'); });
+    }
+    function deleteNews(id) { if (confirm('Delete?')) { api('DELETE', '/news/' + id).then(() => { loadNews(); toast('Deleted!'); }); } }
+
+    // --- Compliance ---
+    function loadCompliance() {
+      api('GET', '/compliance')
+        .then(data => {
+          if (!Array.isArray(data)) data = data.items || [];
+          document.querySelector('#complianceTable tbody').innerHTML = data.map(c => `<tr>
+            <td>${c.month}</td><td>${c.day}</td><td>${c.event}</td>
+            <td><span class="tag tag-green">${c.category}</span></td>
+            <td><span class="tag ${c.priority==='high'?'tag-red':c.priority==='medium'?'tag-yellow':'tag-blue'}">${c.priority}</span></td>
+            <td>
+              <button class="btn btn-outline btn-sm" onclick='editCompliance(${JSON.stringify(c)})'>Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteCompliance(${c.id})">Del</button>
+            </td></tr>`).join('');
+        });
+    }
+    function openComplianceModal() { currentEditId = null; document.getElementById('compModalTitle').textContent = 'Add Date'; clearForm('complianceModal'); openModal('complianceModal'); }
+    function editCompliance(c) { currentEditId = c.id; document.getElementById('compModalTitle').textContent = 'Edit Date'; document.getElementById('cMonth').value = c.month; document.getElementById('cDay').value = c.day; document.getElementById('cEvent').value = c.event; document.getElementById('cCat').value = c.category; document.getElementById('cPriority').value = c.priority; document.getElementById('cDesc').value = c.description; openModal('complianceModal'); }
+    function saveCompliance() {
+      const body = { month: document.getElementById('cMonth').value, day: Number(document.getElementById('cDay').value), event: document.getElementById('cEvent').value, category: document.getElementById('cCat').value, priority: document.getElementById('cPriority').value, description: document.getElementById('cDesc').value };
+      (currentEditId ? api('PUT', '/compliance/' + currentEditId, body) : api('POST', '/compliance', body))
+        .then(() => { closeModal('complianceModal'); loadCompliance(); toast(currentEditId ? 'Updated!' : 'Added!'); });
+    }
+    function deleteCompliance(id) { if (confirm('Delete?')) { api('DELETE', '/compliance/' + id).then(() => { loadCompliance(); toast('Deleted!'); }); } }
+
+    // --- Tax Rates ---
+    function loadTaxRates() {
+      api('GET', '/tax-rates')
+        .then(data => {
+          document.querySelector('#taxRatesTable tbody').innerHTML = (Array.isArray(data)?data:[]).map(t => `<tr>
+            <td><span class="tag tag-blue">${t.category}</span></td><td>${t.sub_category}</td><td><strong>${t.rate}</strong></td><td>${t.description}</td>
+            <td>
+              <button class="btn btn-outline btn-sm" onclick='editTaxRate(${JSON.stringify(t)})'>Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteTaxRate(${t.id})">Del</button>
+            </td></tr>`).join('');
+        });
+    }
+    function openTaxRateModal() { currentEditId = null; document.getElementById('taxModalTitle').textContent = 'Add Rate'; clearForm('taxRateModal'); openModal('taxRateModal'); }
+    function editTaxRate(t) { currentEditId = t.id; document.getElementById('taxModalTitle').textContent = 'Edit Rate'; document.getElementById('tCat').value = t.category; document.getElementById('tSub').value = t.sub_category; document.getElementById('tRate').value = t.rate; document.getElementById('tDesc').value = t.description; openModal('taxRateModal'); }
+    function saveTaxRate() {
+      const body = { category: document.getElementById('tCat').value, sub_category: document.getElementById('tSub').value, rate: document.getElementById('tRate').value, description: document.getElementById('tDesc').value };
+      (currentEditId ? api('PUT', '/tax-rates/' + currentEditId, body) : api('POST', '/tax-rates', body))
+        .then(() => { closeModal('taxRateModal'); loadTaxRates(); toast(currentEditId ? 'Updated!' : 'Added!'); });
+    }
+    function deleteTaxRate(id) { if (confirm('Delete?')) { api('DELETE', '/tax-rates/' + id).then(() => { loadTaxRates(); toast('Deleted!'); }); } }
+
+    // --- Logs ---
+    function loadLogs() {
+      api('GET', '/stats').then(data => {
+        document.querySelector('#logsTable tbody').innerHTML = (data.fetchLogs || []).map(l => `<tr>
+          <td>${l.source}</td><td><span class="tag ${l.status==='success'?'tag-green':'tag-red'}">${l.status}</span></td>
+          <td>${l.items_fetched}</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${l.error_message||'-'}</td><td>${l.fetched_at}</td></tr>`).join('');
+      });
+    }
+
+    function triggerFetch() {
+      const btn = document.getElementById('fetchBtn');
+      btn.disabled = true; btn.textContent = 'Fetching...';
+      api('POST', '/trigger-fetch').then(r => {
+        btn.disabled = false; btn.textContent = 'Fetch Latest News';
+        toast(r.success ? `Fetched from ${r.results?.length||0} sources` : 'Fetch failed: ' + r.error, !r.success);
+        loadLogs();
+      }).catch(() => { btn.disabled = false; btn.textContent = 'Fetch Latest News'; });
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    function clearForm(modalId) {
+      document.getElementById(modalId).querySelectorAll('input,textarea').forEach(el => { if (el.type !== 'date') el.value = ''; });
+    }
+
+    // Check auth on load
+    checkAuth();
+  </script>
+</body>
+</html>
