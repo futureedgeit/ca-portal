@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router';
 import { gstRates, registrationThresholds, gstrReturns, itcRules, reverseCharge } from '../data/gst';
 
 const tabs = [
