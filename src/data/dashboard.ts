@@ -1,7 +1,7 @@
 export const statsCards = [
-  { label: 'Income Tax Slabs', value: 'New Regime', detail: 'FY 2025-26', color: 'blue' },
+  { label: 'Income Tax Slabs', value: 'New Regime', detail: 'FY 2026-27', color: 'blue' },
   { label: 'GST Rate', value: '5-Tier', detail: '0% to 28%', color: 'green' },
-  { label: 'Due This Month', value: '7 Filings', detail: 'July 2026', color: 'yellow' },
+  { label: 'Due This Month', value: '4 Filings', detail: 'August 2026', color: 'yellow' },
   { label: 'Latest Notifications', value: '14 New', detail: 'This week', color: 'purple' },
 ];
 
