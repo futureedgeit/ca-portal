@@ -67,8 +67,13 @@ export default function NewsUpdates() {
 
   const formatDate = (d: string) => {
     if (!d) return { day: '--', month: '---', year: '----' };
+    const parts = d.split(' ');
+    if (parts.length === 3) {
+      return { day: parts[0], month: parts[1], year: parts[2] };
+    }
     try {
       const dt = new Date(d);
+      if (isNaN(dt.getTime())) throw new Error('Invalid');
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       return { day: dt.getDate(), month: months[dt.getMonth()], year: dt.getFullYear() };
     } catch { return { day: '--', month: '---', year: '----' }; }
