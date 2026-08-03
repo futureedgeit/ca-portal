@@ -28,15 +28,15 @@ import adminRoutes from '../server/routes/admin.js';
 import { fetchAllNews } from '../server/scrapers/index.js';
 
 // Routes
-app.get('/api/health', (req: Request, res: Response) => {
+app.get(['/api/health', '/health'], (req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.use('/api/news', newsRoutes);
-app.use('/api/tax-rates', taxRatesRoutes);
-app.use('/api/compliance', complianceRoutes);
-app.use('/api/content', contentRoutes);
-app.use('/api/admin', adminRoutes);
+app.use(['/api/news', '/news'], newsRoutes);
+app.use(['/api/tax-rates', '/tax-rates'], taxRatesRoutes);
+app.use(['/api/compliance', '/compliance'], complianceRoutes);
+app.use(['/api/content', '/content'], contentRoutes);
+app.use(['/api/admin', '/admin'], adminRoutes);
 
 app.post('/api/fetch', async (req: Request, res: Response) => {
   try {
