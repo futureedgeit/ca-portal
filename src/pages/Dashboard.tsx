@@ -5,7 +5,7 @@ import {
   TrendingUp, AlertCircle, Clock, ArrowRight, Bell, LucideIcon
 } from 'lucide-react';
 import { statsCards, quickLinks } from '../data/dashboard';
-import { complianceEvents } from '../data/calendar';
+import { complianceEvents, getUpcomingDeadlines, calculateDaysRemaining } from '../data/calendar';
 import { NewsItem, ComplianceItem } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -28,7 +28,7 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 export default function Dashboard() {
-  const [deadlines, setDeadlines] = useState<ComplianceItem[]>([]);
+  const [deadlines, setDeadlines] = useState<any[]>([]);
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
 
@@ -40,8 +40,8 @@ export default function Dashboard() {
 
     fetch(`${API_BASE}/compliance/upcoming`)
       .then(r => r.json())
-      .then(data => setDeadlines(Array.isArray(data) && data.length > 0 ? data.slice(0, 6) : complianceEvents.slice(0, 6)))
-      .catch(() => setDeadlines(complianceEvents.slice(0, 6)));
+      .then(data => setDeadlines(Array.isArray(data) && data.length > 0 ? data : getUpcomingDeadlines().slice(0, 6)))
+      .catch(() => setDeadlines(getUpcomingDeadlines().slice(0, 6)));
 
     fetch(`${API_BASE}/news?limit=4`)
       .then(r => r.json())
@@ -85,10 +85,12 @@ export default function Dashboard() {
             {deadlines.length > 0 ? deadlines.map((item, i) => (
               <div key={i} className="flex items-center justify-between px-6 py-4 hover:bg-gray-50">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-sm font-bold text-primary-500">{getDaysLeft(item.month, item.day)}d</div>
+                  <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-sm font-bold text-primary-500">
+                    {item.dueDate ? calculateDaysRemaining(item.dueDate) : getDaysLeft(item.month, item.day)}d
+                  </div>
                   <div>
                     <p className="font-medium text-gray-800">{item.event}</p>
-                    <p className="text-xs text-gray-400">{item.day} {item.month} 2026</p>
+                    <p className="text-xs text-gray-400">{item.day} {item.month} {item.dueDate ? item.dueDate.split('-')[0] : '2026'}</p>
                   </div>
                 </div>
                 <span className={`tag ${priorityBadge[item.priority] || 'tag-yellow'}`}>{item.category}</span>

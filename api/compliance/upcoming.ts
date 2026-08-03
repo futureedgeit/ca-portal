@@ -1,4 +1,4 @@
-import { complianceEvents } from '../../src/data/calendar.js';
+import { getUpcomingDeadlines } from '../../src/data/calendar.js';
 
 export default function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -9,21 +9,18 @@ export default function handler(req: any, res: any) {
     return res.status(200).end();
   }
 
-  const { month, category, priority } = req.query || {};
+  const { category, priority, limit = 6 } = req.query || {};
 
-  let events = complianceEvents;
-
-  if (month && month !== 'All') {
-    events = events.filter((e: any) => e.month.toLowerCase() === String(month).toLowerCase());
-  }
+  let upcoming = getUpcomingDeadlines();
 
   if (category && category !== 'All') {
-    events = events.filter((e: any) => e.category.toLowerCase() === String(category).toLowerCase());
+    upcoming = upcoming.filter((e: any) => e.category.toLowerCase() === String(category).toLowerCase());
   }
 
   if (priority && priority !== 'All') {
-    events = events.filter((e: any) => e.priority.toLowerCase() === String(priority).toLowerCase());
+    upcoming = upcoming.filter((e: any) => e.priority.toLowerCase() === String(priority).toLowerCase());
   }
 
-  return res.status(200).json(events);
+  const numLimit = Number(limit) || 6;
+  return res.status(200).json(upcoming.slice(0, numLimit));
 }
