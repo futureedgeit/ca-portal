@@ -117,7 +117,7 @@ export async function fetchAllNews() {
 
   const summary = results.map((r) => {
     if (r.status === 'fulfilled') return r.value;
-    return (r as PromiseRejectionResult).reason;
+    return (r as PromiseRejectedResult).reason;
   });
 
   console.log('[FETCH] Complete:', summary.map((s: any) => `${s.source}: ${s.inserted || 0}/${s.total || 0}${s.error ? ' ERR:' + s.error : ''}`).join(' | '));
