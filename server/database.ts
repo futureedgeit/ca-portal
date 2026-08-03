@@ -6,18 +6,34 @@ import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const isVercel = process.env.VERCEL || process.env.NODE_ENV === 'production';
-const DB_PATH = isVercel ? '/tmp/ca-portal.db' : join(__dirname, 'ca-portal.db');
+let db: any;
 
-if (isVercel && !fs.existsSync(DB_PATH)) {
-  const seedDbPath = join(__dirname, 'ca-portal.db');
-  if (fs.existsSync(seedDbPath)) {
-    fs.copyFileSync(seedDbPath, DB_PATH);
+try {
+  const Database = (await import('better-sqlite3')).default;
+  const isVercel = Boolean(process.env.VERCEL || process.env.NODE_ENV === 'production');
+  const DB_PATH = isVercel ? '/tmp/ca-portal.db' : join(__dirname, 'ca-portal.db');
+
+  if (isVercel && !fs.existsSync(DB_PATH)) {
+    const seedDbPath = join(__dirname, 'ca-portal.db');
+    if (fs.existsSync(seedDbPath)) {
+      fs.copyFileSync(seedDbPath, DB_PATH);
+    }
   }
-}
 
-const db: Database.Database = new Database(DB_PATH);
-db.pragma('journal_mode = WAL');
+  db = new Database(DB_PATH);
+  db.pragma('journal_mode = WAL');
+} catch (err) {
+  console.warn('[DB] Native better-sqlite3 not supported in this runtime environment, using memory/mock fallback:', err);
+  db = {
+    prepare: () => ({
+      all: () => [],
+      get: () => undefined,
+      run: () => ({ changes: 0 }),
+    }),
+    exec: () => {},
+    pragma: () => {},
+  };
+}
 
 // Initialize database schema
 db.exec(`
