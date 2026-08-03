@@ -7,7 +7,7 @@ import {
 import { statsCards, quickLinks } from '../data/dashboard';
 import { NewsItem, ComplianceItem } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 const colorMap: Record<string, string> = {
   blue: 'bg-blue-50 text-blue-700 border-blue-200',

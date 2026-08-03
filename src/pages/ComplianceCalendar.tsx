@@ -3,7 +3,7 @@ import { CalendarDays, Filter, AlertCircle, RefreshCw } from 'lucide-react';
 import { complianceEvents as staticEvents } from '../data/calendar';
 import { ComplianceItem } from '../types';
 
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 const months = ['All', 'July', 'August', 'September', 'October', 'November', 'December', 'January', 'February', 'March'];
 const categories = ['All', 'Income Tax', 'GST', 'TDS', 'Company Law', 'Labour Law', 'General'];
 const priorities = ['All', 'high', 'medium', 'low'];

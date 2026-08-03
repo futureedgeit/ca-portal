@@ -3,7 +3,7 @@ import { newsItems as staticNews } from '../data/news';
 import { Newspaper, Search, ExternalLink, Tag, RefreshCw } from 'lucide-react';
 import { NewsItem } from '../types';
 
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 const categories = ['All', 'Income Tax', 'GST', 'Company Law', 'SEBI', 'Auditing', 'Finance'];
 
 export default function NewsUpdates() {
