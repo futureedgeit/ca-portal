@@ -7,7 +7,7 @@ import {
 import { statsCards, quickLinks } from '../data/dashboard';
 import { NewsItem, ComplianceItem } from '../types';
 
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001/api';
 
 const colorMap: Record<string, string> = {
   blue: 'bg-blue-50 text-blue-700 border-blue-200',
@@ -62,15 +62,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {backendOnline === false && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
-          <strong>Backend not running.</strong> News and deadlines show saved data. Run <code className="bg-yellow-100 px-1 rounded">start.bat</code> or start the API server at <code className="bg-yellow-100 px-1 rounded">localhost:3001</code> for live updates from government sources.
-        </div>
-      )}
-      <div>
-        <h1 className="text-3xl font-bold text-primary-500">Dashboard</h1>
-        <p className="text-gray-500 mt-1">Welcome to CA Portal — your comprehensive accounting & finance resource for FY 2025-26</p>
-      </div>
+
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statsCards.map((stat, i) => (
