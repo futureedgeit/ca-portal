@@ -113,6 +113,28 @@ export const complianceEvents: CalendarEvent[] = rawComplianceEvents.map((item, 
 });
 
 /**
+ * Get current Financial Year string (e.g. FY 2026-27) dynamically based on current date.
+ */
+export function getCurrentFinancialYear(referenceDate: Date = new Date()): string {
+  const year = referenceDate.getFullYear();
+  const month = referenceDate.getMonth(); // 0-indexed (0=Jan, 3=Apr)
+  // If April or later, FY is currentYear - (currentYear + 1)
+  const startYear = month >= 3 ? year : year - 1;
+  const endYearShort = String(startYear + 1).slice(-2);
+  return `FY ${startYear}-${endYearShort}`;
+}
+
+/**
+ * Get count of filings due in the current calendar month.
+ */
+export function getCurrentMonthFilingsCount(referenceDate: Date = new Date()): { count: number; monthName: string } {
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const monthName = monthNames[referenceDate.getMonth()];
+  const count = complianceEvents.filter(e => e.month.toLowerCase() === monthName.toLowerCase()).length;
+  return { count, monthName };
+}
+
+/**
  * Filter upcoming deadlines starting from today up to the end of the current financial year.
  */
 export function getUpcomingDeadlines(referenceDate: Date = new Date()): CalendarEvent[] {

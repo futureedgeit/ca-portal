@@ -1,6 +1,7 @@
 import { useState, ReactNode } from 'react';
 import { Menu } from 'lucide-react';
 import Sidebar from './Sidebar';
+import { getCurrentFinancialYear } from '../data/calendar';
 
 interface LayoutProps {
   children: ReactNode;
@@ -8,6 +9,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const currentFY = getCurrentFinancialYear();
 
   return (
     <div className="flex min-h-screen">
@@ -25,7 +27,7 @@ export default function Layout({ children }: LayoutProps) {
 
             <div className="flex items-center gap-4 ml-auto">
               <span className="text-xs text-gray-400 hidden sm:block">
-                Financial Year 2026-27
+                Financial Year {currentFY.replace('FY ', '')}
               </span>
               <div className="w-9 h-9 bg-primary-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
                 CA
@@ -41,7 +43,7 @@ export default function Layout({ children }: LayoutProps) {
         <footer className="border-t border-gray-200 bg-white px-4 lg:px-8 py-6">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
             <p>CA Portal — Comprehensive Resource for Chartered Accountants</p>
-            <p>Financial Year 2026-27 | All information is for reference purposes</p>
+            <p>Financial Year {currentFY.replace('FY ', '')} | All information is for reference purposes</p>
           </div>
         </footer>
       </div>

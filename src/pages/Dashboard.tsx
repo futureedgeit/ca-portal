@@ -4,8 +4,8 @@ import {
   Calculator, FileText, CalendarDays, Newspaper, FileCheck, Building2,
   TrendingUp, AlertCircle, Clock, ArrowRight, Bell, LucideIcon
 } from 'lucide-react';
-import { statsCards, quickLinks } from '../data/dashboard';
-import { complianceEvents, getUpcomingDeadlines, calculateDaysRemaining } from '../data/calendar';
+import { statsCards as defaultStatsCards, quickLinks } from '../data/dashboard';
+import { complianceEvents, getUpcomingDeadlines, calculateDaysRemaining, getCurrentFinancialYear, getCurrentMonthFilingsCount } from '../data/calendar';
 import { NewsItem, ComplianceItem } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -31,6 +31,16 @@ export default function Dashboard() {
   const [deadlines, setDeadlines] = useState<any[]>([]);
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
+
+  const currentFY = getCurrentFinancialYear();
+  const monthFilings = getCurrentMonthFilingsCount();
+
+  const dynamicStatsCards = [
+    { label: 'Income Tax Slabs', value: 'New Regime', detail: currentFY, color: 'blue' },
+    { label: 'GST Rate', value: '5-Tier', detail: '0% to 28%', color: 'green' },
+    { label: 'Due This Month', value: `${monthFilings.count} Filings`, detail: `${monthFilings.monthName} ${new Date().getFullYear()}`, color: 'yellow' },
+    { label: 'Latest Notifications', value: `${newsItems.length > 0 ? newsItems.length + ' New' : '14 New'}`, detail: 'This week', color: 'purple' },
+  ];
 
   useEffect(() => {
     fetch(`${API_BASE}/health`)
@@ -66,7 +76,7 @@ export default function Dashboard() {
 
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statsCards.map((stat, i) => (
+        {dynamicStatsCards.map((stat, i) => (
           <div key={i} className={`card border-l-4 ${colorMap[stat.color] || 'bg-blue-50'}`}>
             <p className="text-sm text-gray-500">{stat.label}</p>
             <p className="text-2xl font-bold mt-1">{stat.value}</p>
