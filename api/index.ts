@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Auto-clean any articles with raw XML on every startup
-import { cleanAllArticles } from './routes/news.js';
+import { cleanAllArticles } from '../server/routes/news.js';
 cleanAllArticles();
 
 // Middleware
@@ -20,12 +20,12 @@ app.use(express.json());
 app.use('/admin', express.static(join(__dirname, '..', 'admin')));
 
 // Import routes
-import newsRoutes from './routes/news.js';
-import taxRatesRoutes from './routes/tax-rates.js';
-import complianceRoutes from './routes/compliance.js';
-import contentRoutes from './routes/content.js';
-import adminRoutes from './routes/admin.js';
-import { fetchAllNews } from './scrapers/index.js';
+import newsRoutes from '../server/routes/news.js';
+import taxRatesRoutes from '../server/routes/tax-rates.js';
+import complianceRoutes from '../server/routes/compliance.js';
+import contentRoutes from '../server/routes/content.js';
+import adminRoutes from '../server/routes/admin.js';
+import { fetchAllNews } from '../server/scrapers/index.js';
 
 // Routes
 app.get('/api/health', (req: Request, res: Response) => {

@@ -2,9 +2,19 @@ import Database from 'better-sqlite3';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
+import fs from 'fs';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const DB_PATH = join(__dirname, 'ca-portal.db');
+const isVercel = process.env.VERCEL || process.env.NODE_ENV === 'production';
+const DB_PATH = isVercel ? '/tmp/ca-portal.db' : join(__dirname, 'ca-portal.db');
+
+if (isVercel && !fs.existsSync(DB_PATH)) {
+  const seedDbPath = join(__dirname, 'ca-portal.db');
+  if (fs.existsSync(seedDbPath)) {
+    fs.copyFileSync(seedDbPath, DB_PATH);
+  }
+}
 
 const db: Database.Database = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
