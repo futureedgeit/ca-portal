@@ -5,6 +5,7 @@ import {
   TrendingUp, AlertCircle, Clock, ArrowRight, Bell, LucideIcon
 } from 'lucide-react';
 import { statsCards, quickLinks } from '../data/dashboard';
+import { complianceEvents } from '../data/calendar';
 import { NewsItem, ComplianceItem } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -39,8 +40,8 @@ export default function Dashboard() {
 
     fetch(`${API_BASE}/compliance/upcoming`)
       .then(r => r.json())
-      .then(data => setDeadlines(Array.isArray(data) ? data.slice(0, 6) : []))
-      .catch(() => {});
+      .then(data => setDeadlines(Array.isArray(data) && data.length > 0 ? data.slice(0, 6) : complianceEvents.slice(0, 6)))
+      .catch(() => setDeadlines(complianceEvents.slice(0, 6)));
 
     fetch(`${API_BASE}/news?limit=4`)
       .then(r => r.json())
